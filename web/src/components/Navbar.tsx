@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
+import { AppBar, Toolbar, Button, Typography, Box } from '@mui/material';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -13,31 +14,42 @@ const Navbar = () => {
   };
 
   return (
-    <nav style={{ padding: 16, borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between' }}>
-      <div>
-        <Link href="/">Home</Link> |
-        {!user && (
-          <>
-            <Link href="/login"> Login</Link> |
-            <Link href="/signup"> Sign Up</Link>
-          </>
-        )}
+    <AppBar position="static" sx={{ bgcolor: '#2c3e50' }}>
+      <Toolbar className="flex justify-between items-center max-w-7xl mx-auto w-full px-4">
+        <Box className="flex items-center space-x-4">
+          <Typography variant="h6" component="div" className="mr-4">
+            <Link href="/" className="text-white no-underline">
+              MediLink
+            </Link>
+          </Typography>
+          <nav className="flex space-x-4">
+            {!user ? (
+              <>
+                <Link href="/login" passHref legacyBehavior><Button color="inherit" className="text-white">Login</Button></Link>
+                <Link href="/signup" passHref legacyBehavior><Button color="inherit" className="text-white">Sign Up</Button></Link>
+              </>
+            ) : (
+              <>
+                <Link href="/dashboard" passHref legacyBehavior><Button color="inherit" className="text-white">Dashboard</Button></Link>
+                <Link href="/appointments" passHref legacyBehavior><Button color="inherit" className="text-white">Appointments</Button></Link>
+                <Link href="/reports" passHref legacyBehavior><Button color="inherit" className="text-white">Medical Reports</Button></Link>
+                <Link href="/profile" passHref legacyBehavior><Button color="inherit" className="text-white">Profile</Button></Link>
+              </>
+            )}
+          </nav>
+        </Box>
         {user && (
-          <>
-            <Link href="/dashboard"> Dashboard</Link> |
-            <Link href="/appointments"> Appointments</Link> |
-            <Link href="/reports"> Medical Reports</Link> |
-            <Link href="/profile"> Profile</Link>
-          </>
+          <Box className="flex items-center">
+            <Typography variant="body1" className="text-white mr-4">
+              Welcome, {user.name} ({user.role})
+            </Typography>
+            <Button color="inherit" onClick={handleLogout} className="text-white border border-white hover:bg-white hover:text-gray-800">
+              Logout
+            </Button>
+          </Box>
         )}
-      </div>
-      {user && (
-        <div>
-          <span>Welcome, {user.name} ({user.role})</span>
-          <button onClick={handleLogout} style={{ marginLeft: 10 }}>Logout</button>
-        </div>
-      )}
-    </nav>
+      </Toolbar>
+    </AppBar>
   );
 };
 

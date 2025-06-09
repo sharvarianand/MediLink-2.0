@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { getReports } from '../services/reports';
 import { useAuth } from '../context/AuthContext';
 import { formatDate } from '../utils/helpers';
+import { Typography, Box, Paper, Alert, List, ListItem, ListItemText, Button } from '@mui/material';
 
 interface MedicalReport {
   _id: string;
   patientId: string;
-  doctorId: { name: string; email: string };
+  doctorId: { _id: string; name: string; email: string };
   fileUrl: string;
   fileName: string;
   fileType: string;
@@ -44,34 +45,74 @@ const ReportList = () => {
     }
   }, [user]);
 
-  if (loading) return <p>Loading medical reports...</p>;
-  if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
-  if (reports.length === 0) return <p>No medical reports found.</p>;
+  if (loading) return <Typography>Loading medical reports...</Typography>;
+  if (error) return <Alert severity="error">Error: {error}</Alert>;
+  if (reports.length === 0) return <Typography>No medical reports found.</Typography>;
 
   return (
-    <div style={{ marginTop: 32 }}>
-      <h3>Your Medical Reports</h3>
-      <ul style={{ listStyle: 'none', padding: 0 }}>
+    <Box className="mt-8">
+      <Typography variant="h5" component="h3" className="mb-4 text-gray-800 font-bold">
+        Your Medical Reports
+      </Typography>
+      <List>
         {reports.map(report => (
-          <li key={report._id} style={{ border: '1px solid #eee', padding: 15, marginBottom: 10, borderRadius: 8 }}>
-            <p><strong>File Name:</strong> {report.fileName}</p>
-            <p><strong>Report Type:</strong> {report.reportType.toUpperCase()}</p>
-            <p><strong>Date:</strong> {formatDate(report.date)}</p>
-            <p><strong>Uploaded At:</strong> {formatDate(report.uploadedAt)}</p>
-            {report.doctorId && <p><strong>Doctor:</strong> {report.doctorId.name}</p>}
-            {report.extractedText && (
-              <div>
-                <p><strong>Extracted Text:</strong></p>
-                <p style={{ whiteSpace: 'pre-wrap', border: '1px dashed #ddd', padding: 10 }}>
-                  {report.extractedText.substring(0, 300)}...
-                </p>
-              </div>
-            )}
-            <p><a href={report.fileUrl} target="_blank" rel="noopener noreferrer">View Original File</a></p>
-          </li>
+          <Paper elevation={2} key={report._id} className="p-4 mb-4 rounded-lg shadow-md">
+            <ListItem className="flex flex-col items-start p-0">
+              <ListItemText
+                primary={
+                  <Typography variant="h6" component="span" className="text-indigo-700">
+                    {report.fileName}
+                  </Typography>
+                }
+                secondary={
+                  <>
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>Report Type:</strong> {report.reportType.toUpperCase()}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>Date:</strong> {formatDate(report.date)}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>Uploaded At:</strong> {formatDate(report.uploadedAt)}
+                    </Typography>
+                    {report.doctorId && (
+                      <Typography variant="body2" color="text.secondary">
+                        <strong>Doctor:</strong> {report.doctorId.name}
+                      </Typography>
+                    )}
+                    {report.notes && (
+                      <Typography variant="body2" color="text.secondary">
+                        <strong>Notes:</strong> {report.notes}
+                      </Typography>
+                    )}
+                    {report.extractedText && (
+                      <Box className="mt-2 p-2 border border-dashed border-gray-300 rounded-md bg-gray-50">
+                        <Typography variant="body2" className="font-semibold">Extracted Text Preview:</Typography>
+                        <Typography variant="caption" style={{ whiteSpace: 'pre-wrap', maxHeight: '100px', overflowY: 'auto', display: 'block' }}>
+                          {report.extractedText.substring(0, 300)}{report.extractedText.length > 300 ? '...' : ''}
+                        </Typography>
+                      </Box>
+                    )}
+                    <Box className="mt-3">
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        href={report.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        size="small"
+                      >
+                        View Original File
+                      </Button>
+                    </Box>
+                  </>
+                }
+              />
+            </ListItem>
+          </Paper>
         ))}
-      </ul>
-    </div>
+      </List>
+    </Box>
   );
 };
 

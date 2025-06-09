@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
 import AppointmentForm from '../components/AppointmentForm';
 import AppointmentList from '../components/AppointmentList';
+import { Container, Typography, Box } from '@mui/material';
 
 const AppointmentsPage = () => {
   const { user, token } = useAuth();
@@ -15,19 +16,27 @@ const AppointmentsPage = () => {
   }, [user, token, router]);
 
   if (!user) {
-    return <div style={{ padding: 32 }}>Loading or redirecting...</div>;
+    return (
+      <Container maxWidth="sm" className="mt-10 p-6 shadow-md rounded-lg bg-white text-center">
+        <Typography variant="h6">Loading or redirecting...</Typography>
+      </Container>
+    );
   }
 
   return (
-    <div style={{ padding: 32 }}>
-      <h2>Appointments</h2>
+    <Container maxWidth="lg" className="mt-10 p-6 shadow-md rounded-lg bg-white">
+      <Box className="flex flex-col items-center mb-6">
+        <Typography variant="h4" component="h2" className="text-gray-800 font-bold mb-4">
+          Manage Appointments
+        </Typography>
+      </Box>
 
       {user.role === 'patient' && (
         <AppointmentForm />
       )}
 
       <AppointmentList />
-    </div>
+    </Container>
   );
 };
 

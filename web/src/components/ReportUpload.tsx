@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { uploadReport } from '../services/reports';
 import { getDoctors } from '../services/appointments'; // To select a doctor for the report
+import { TextField, Button, Typography, Box, FormControl, InputLabel, Select, MenuItem, Alert } from '@mui/material';
 
 interface Doctor {
   id: string;
@@ -18,7 +19,8 @@ const ReportUpload = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loadingDoctors, setLoadingDoctors] = useState<boolean>(true);
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -30,6 +32,8 @@ const ReportUpload = () => {
         }
       } catch (err: any) {
         console.error('Failed to load doctors for report upload:', err);
+      } finally {
+        setLoadingDoctors(false);
       }
     };
     fetchDoctors();
@@ -39,11 +43,11 @@ const ReportUpload = () => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-    setLoading(true);
+    setSubmitting(true);
 
     if (!file || !reportDate || !reportType || !doctorId) {
       setError('Please fill in all required fields (File, Date, Type, Doctor).');
-      setLoading(false);
+      setSubmitting(false);
       return;
     }
 
@@ -66,61 +70,102 @@ const ReportUpload = () => {
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to upload report.');
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
   return (
-    <div style={{ marginBottom: 32, padding: 20, border: '1px solid #ccc', borderRadius: 8 }}>
-      <h3>Upload Medical Report</h3>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: 'green' }}>{success}</p>}
-      <form onSubmit={handleSubmit}>
+    <Box className="mb-8 p-6 border border-gray-200 rounded-lg shadow-sm bg-white">
+      <Typography variant="h6" component="h3" className="mb-4 text-gray-800 font-semibold">
+        Upload Medical Report
+      </Typography>
+      {error && <Alert severity="error" className="mb-4">{error}</Alert>}
+      {success && <Alert severity="success" className="mb-4">{success}</Alert>}
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label>Select File (Image/PDF):</label>
+          <InputLabel htmlFor="fileInput" className="mb-2 block text-sm font-medium text-gray-700">Select File (Image/PDF):</InputLabel>
           <input
             id="fileInput"
             type="file"
             onChange={e => setFile(e.target.files ? e.target.files[0] : null)}
             required
+            className="block w-full text-sm text-gray-500
+            file:mr-4 file:py-2 file:px-4
+            file:rounded-md file:border-0
+            file:text-sm file:font-semibold
+            file:bg-blue-50 file:text-blue-700
+            hover:file:bg-blue-100"
           />
         </div>
-        <div>
-          <label>Report Type:</label>
-          <select value={reportType} onChange={e => setReportType(e.target.value)} required>
-            <option value="lab">Lab Report</option>
-            <option value="prescription">Prescription</option>
-            <option value="xray">X-Ray</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-        <div>
-          <label>Date of Report:</label>
-          <input type="date" value={reportDate} onChange={e => setReportDate(e.target.value)} required />
-        </div>
-        <div>
-          <label>Associated Doctor:</label>
-          <select value={doctorId} onChange={e => setDoctorId(e.target.value)} required>
-            {doctors.length === 0 ? (
-                <option value="">Loading doctors...</option>
+        <FormControl fullWidth variant="outlined">
+          <InputLabel>Report Type</InputLabel>
+          <Select
+            value={reportType}
+            onChange={e => setReportType(e.target.value as string)}
+            label="Report Type"
+            required
+          >
+            <MenuItem value="lab">Lab Report</MenuItem>
+            <MenuItem value="prescription">Prescription</MenuItem>
+            <MenuItem value="xray">X-Ray</MenuItem>
+            <MenuItem value="other">Other</MenuItem>
+          </Select>
+        </FormControl>
+        <TextField
+          label="Date of Report"
+          type="date"
+          value={reportDate}
+          onChange={e => setReportDate(e.target.value)}
+          fullWidth
+          required
+          variant="outlined"
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
+        <FormControl fullWidth variant="outlined">
+          <InputLabel>Associated Doctor</InputLabel>
+          <Select
+            value={doctorId}
+            onChange={e => setDoctorId(e.target.value as string)}
+            label="Associated Doctor"
+            required
+            disabled={loadingDoctors}
+          >
+            {loadingDoctors ? (
+                <MenuItem value="">Loading doctors...</MenuItem>
+            ) : doctors.length === 0 ? (
+                <MenuItem value="">No doctors available</MenuItem>
             ) : (
                 doctors.map(doc => (
-                    <option key={doc.id} value={doc.id}>
+                    <MenuItem key={doc.id} value={doc.id}>
                         {doc.name} {doc.profile?.specialization ? `(${doc.profile.specialization})` : ''}
-                    </option>
+                    </MenuItem>
                 ))
             )}
-          </select>
-        </div>
-        <div>
-          <label>Notes (optional):</label>
-          <textarea value={notes} onChange={e => setNotes(e.target.value)}></textarea>
-        </div>
-        <button type="submit" style={{ marginTop: 10 }} disabled={loading}>
-          {loading ? 'Uploading...' : 'Upload Report'}
-        </button>
+          </Select>
+        </FormControl>
+        <TextField
+          label="Notes (optional)"
+          multiline
+          rows={2}
+          value={notes}
+          onChange={e => setNotes(e.target.value)}
+          fullWidth
+          variant="outlined"
+        />
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          fullWidth
+          className="py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold"
+          disabled={submitting}
+        >
+          {submitting ? 'Uploading...' : 'Upload Report'}
+        </Button>
       </form>
-    </div>
+    </Box>
   );
 };
 

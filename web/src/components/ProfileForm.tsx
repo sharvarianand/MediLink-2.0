@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getUserProfile, updateUserProfile } from '../services/user';
 import { useAuth } from '../context/AuthContext';
+import { TextField, Button, Typography, Box, FormControl, InputLabel, Select, MenuItem, Alert, Paper } from '@mui/material';
 
 interface UserProfile {
   id: string;
@@ -17,11 +18,12 @@ interface UserProfile {
 }
 
 const ProfileForm = () => {
-  const { user, login } = useAuth(); // Use login to update context after profile update
+  const { user, login } = useAuth();
   const [profileData, setProfileData] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -52,6 +54,7 @@ const ProfileForm = () => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
+    setSubmitting(true);
 
     if (!profileData) return;
 
@@ -60,64 +63,110 @@ const ProfileForm = () => {
         name: profileData.name,
         profile: profileData.profile,
       });
-      // Update the user in AuthContext to reflect changes
       if (user) {
         login(updatedUser, localStorage.getItem('token') || '');
       }
       setSuccess('Profile updated successfully!');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  if (loading) return <p>Loading profile...</p>;
-  if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
-  if (!profileData) return <p>No profile data available.</p>;
+  if (loading) return <Typography>Loading profile...</Typography>;
+  if (error) return <Alert severity="error">Error: {error}</Alert>;
+  if (!profileData) return <Typography>No profile data available.</Typography>;
 
   return (
-    <div style={{ marginBottom: 32, padding: 20, border: '1px solid #ccc', borderRadius: 8 }}>
-      <h3>Your Profile</h3>
-      {success && <p style={{ color: 'green' }}>{success}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Name:</label>
-          <input name="name" value={profileData.name} onChange={handleChange} required />
-        </div>
-        <div>
-          <label>Email:</label>
-          <input type="email" value={profileData.email} disabled style={{ background: '#f0f0f0' }} />
-        </div>
-        <div>
-          <label>Age:</label>
-          <input type="number" name="age" value={profileData.profile?.age || ''} onChange={handleChange} />
-        </div>
-        <div>
-          <label>Gender:</label>
-          <select name="gender" value={profileData.profile?.gender || ''} onChange={handleChange}>
-            <option value="">Select Gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
+    <Paper elevation={3} className="mb-8 p-6 rounded-lg shadow-md bg-white">
+      <Typography variant="h5" component="h3" className="mb-6 text-gray-800 font-bold">
+        Your Profile
+      </Typography>
+      {success && <Alert severity="success" className="mb-4">{success}</Alert>}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <TextField
+          label="Name"
+          name="name"
+          value={profileData.name}
+          onChange={handleChange}
+          fullWidth
+          required
+          variant="outlined"
+        />
+        <TextField
+          label="Email"
+          type="email"
+          value={profileData.email}
+          disabled
+          fullWidth
+          variant="filled"
+          className="bg-gray-100"
+        />
+        <TextField
+          label="Age"
+          type="number"
+          name="age"
+          value={profileData.profile?.age || ''}
+          onChange={handleChange}
+          fullWidth
+          variant="outlined"
+        />
+        <FormControl fullWidth variant="outlined">
+          <InputLabel>Gender</InputLabel>
+          <Select
+            name="gender"
+            value={profileData.profile?.gender || ''}
+            onChange={handleChange}
+            label="Gender"
+          >
+            <MenuItem value="">Select Gender</MenuItem>
+            <MenuItem value="male">Male</MenuItem>
+            <MenuItem value="female">Female</MenuItem>
+            <MenuItem value="other">Other</MenuItem>
+          </Select>
+        </FormControl>
         {user?.role === 'doctor' && (
-          <div>
-            <label>Specialization:</label>
-            <input name="specialization" value={profileData.profile?.specialization || ''} onChange={handleChange} />
-          </div>
+          <TextField
+            label="Specialization"
+            name="specialization"
+            value={profileData.profile?.specialization || ''}
+            onChange={handleChange}
+            fullWidth
+            variant="outlined"
+          />
         )}
-        <div>
-          <label>Phone:</label>
-          <input name="phone" value={profileData.profile?.phone || ''} onChange={handleChange} />
-        </div>
-        <div>
-          <label>Address:</label>
-          <textarea name="address" value={profileData.profile?.address || ''} onChange={handleChange}></textarea>
-        </div>
-        <button type="submit" style={{ marginTop: 10 }}>Update Profile</button>
+        <TextField
+          label="Phone"
+          name="phone"
+          value={profileData.profile?.phone || ''}
+          onChange={handleChange}
+          fullWidth
+          variant="outlined"
+        />
+        <TextField
+          label="Address"
+          name="address"
+          multiline
+          rows={3}
+          value={profileData.profile?.address || ''}
+          onChange={handleChange}
+          fullWidth
+          variant="outlined"
+        />
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          fullWidth
+          className="py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold"
+          disabled={submitting}
+        >
+          {submitting ? 'Updating...' : 'Update Profile'}
+        </Button>
       </form>
-    </div>
+    </Paper>
   );
 };
 
-export default ProfileForm; 
+export default ProfileForm;

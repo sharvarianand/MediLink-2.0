@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
 import ProfileForm from '../components/ProfileForm';
+import { Container, Typography, Box } from '@mui/material';
 
 const ProfilePage = () => {
   const { user, token } = useAuth();
@@ -14,14 +15,22 @@ const ProfilePage = () => {
   }, [user, token, router]);
 
   if (!user) {
-    return <div style={{ padding: 32 }}>Loading or redirecting...</div>;
+    return (
+      <Container maxWidth="sm" className="mt-10 p-6 shadow-md rounded-lg bg-white text-center">
+        <Typography variant="h6">Loading or redirecting...</Typography>
+      </Container>
+    );
   }
 
   return (
-    <div style={{ padding: 32 }}>
-      <h2>User Profile</h2>
+    <Container maxWidth="md" className="mt-10 p-6 shadow-md rounded-lg bg-white">
+      <Box className="flex flex-col items-center mb-6">
+        <Typography variant="h4" component="h2" className="text-gray-800 font-bold mb-4">
+          Manage Your Profile
+        </Typography>
+      </Box>
       <ProfileForm />
-    </div>
+    </Container>
   );
 };
 

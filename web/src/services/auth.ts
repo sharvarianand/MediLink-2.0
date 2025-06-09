@@ -12,4 +12,14 @@ export async function login(email: string, password: string) {
 export async function signup(name: string, email: string, password: string, role: string, profile: any = {}) {
   const res = await API.post('/auth/signup', { name, email, password, role, profile });
   return res.data;
+}
+
+export async function forgotPassword(email: string) {
+  const res = await API.post('/auth/forgot-password', { email });
+  return res.data;
+}
+
+export async function resetPassword(token: string, password: string) {
+  const res = await API.post(`/auth/reset-password/${token}`, { password });
+  return res.data;
 } 
