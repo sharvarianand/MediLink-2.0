@@ -24,7 +24,10 @@ const Navbar = () => {
         )}
         {user && (
           <>
-            <Link href="/dashboard"> Dashboard</Link>
+            <Link href="/dashboard"> Dashboard</Link> |
+            <Link href="/appointments"> Appointments</Link> |
+            <Link href="/reports"> Medical Reports</Link> |
+            <Link href="/profile"> Profile</Link>
           </>
         )}
       </div>
