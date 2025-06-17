@@ -9,6 +9,7 @@ export default function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('patient');
+  const [specialization, setSpecialization] = useState('');
   const [error, setError] = useState<string | null>(null);
   const { login: authLogin } = useAuth();
   const router = useRouter();
@@ -17,7 +18,8 @@ export default function Signup() {
     e.preventDefault();
     setError(null);
     try {
-      const data = await signup(name, email, password, role);
+      const profile = role === 'doctor' ? { specialization } : {};
+      const data = await signup(name, email, password, role, profile);
       authLogin(data.user, data.token);
       router.push('/dashboard');
     } catch (err: any) {
@@ -71,6 +73,17 @@ export default function Signup() {
               <MenuItem value="doctor">Doctor</MenuItem>
             </Select>
           </FormControl>
+          {role === 'doctor' && (
+            <TextField
+              label="Specialization"
+              type="text"
+              value={specialization}
+              onChange={e => setSpecialization(e.target.value)}
+              fullWidth
+              required
+              variant="outlined"
+            />
+          )}
           <Button
             type="submit"
             variant="contained"

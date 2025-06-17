@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema({
         specialization: {
             type: String,
             required: function() {
-                return this.role === 'doctor';
+                return this.get('role') === 'doctor';
             }
         },
         phone: {

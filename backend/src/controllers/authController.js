@@ -25,7 +25,7 @@ const signup = async (req, res) => {
             email,
             password,
             role,
-            profile
+            profile: role === 'doctor' ? { specialization: profile.specialization } : {}
         });
 
         await user.save();
