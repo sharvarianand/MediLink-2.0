@@ -13,16 +13,25 @@ const Navbar = () => {
     router.push('/login');
   };
 
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (user) {
+      router.push('/dashboard');
+    } else {
+      router.push('/');
+    }
+  };
+
   return (
     <AppBar position="static" sx={{ bgcolor: '#2c3e50' }}>
       <Toolbar className="flex justify-between items-center max-w-7xl mx-auto w-full px-4">
         <Box className="flex items-center space-x-4">
-          <Link href="/" className="flex items-center text-white no-underline" style={{ textDecoration: 'none' }}>
+          <a href={user ? "/dashboard" : "/"} onClick={handleLogoClick} className="flex items-center text-white no-underline" style={{ textDecoration: 'none', cursor: 'pointer' }}>
             <img src="/medilink-logo.svg" alt="MediLink Logo" style={{ width: 32, height: 32, marginRight: 8 }} />
             <Typography variant="h6" component="div" className="mr-4" style={{ color: 'white', fontWeight: 700 }}>
               MediLink
             </Typography>
-          </Link>
+          </a>
           <nav className="flex space-x-4">
             {!user ? (
               <>

@@ -14,6 +14,7 @@ interface UserProfile {
     specialization?: string;
     phone?: string;
     address?: string;
+    medicalConditions?: string[];
   };
 }
 
@@ -48,6 +49,36 @@ const ProfileForm = () => {
     } else {
       setProfileData(prev => prev ? { ...prev, profile: { ...prev.profile, [name]: value } } : null);
     }
+  };
+
+  const handleMedicalConditionChange = (index: number, value: string) => {
+    setProfileData(prev => prev ? {
+      ...prev,
+      profile: {
+        ...prev.profile,
+        medicalConditions: prev.profile?.medicalConditions?.map((cond, i) => i === index ? value : cond) || []
+      }
+    } : null);
+  };
+
+  const handleAddCondition = () => {
+    setProfileData(prev => prev ? {
+      ...prev,
+      profile: {
+        ...prev.profile,
+        medicalConditions: [...(prev.profile?.medicalConditions || []), '']
+      }
+    } : null);
+  };
+
+  const handleRemoveCondition = (index: number) => {
+    setProfileData(prev => prev ? {
+      ...prev,
+      profile: {
+        ...prev.profile,
+        medicalConditions: prev.profile?.medicalConditions?.filter((_, i) => i !== index) || []
+      }
+    } : null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -154,6 +185,34 @@ const ProfileForm = () => {
           fullWidth
           variant="outlined"
         />
+        {user?.role === 'patient' && (
+          <Box>
+            <Typography variant="subtitle1" className="mb-2">Medical Conditions</Typography>
+            {(profileData.profile?.medicalConditions || []).map((condition, idx) => (
+              <Box key={idx} display="flex" alignItems="center" mb={1}>
+                <TextField
+                  label={`Condition ${idx + 1}`}
+                  value={condition}
+                  onChange={e => handleMedicalConditionChange(idx, e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  sx={{ mr: 1 }}
+                />
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={() => handleRemoveCondition(idx)}
+                  sx={{ minWidth: 36 }}
+                >
+                  X
+                </Button>
+              </Box>
+            ))}
+            <Button variant="outlined" color="primary" onClick={handleAddCondition} sx={{ mt: 1 }}>
+              Add Condition
+            </Button>
+          </Box>
+        )}
         <Button
           type="submit"
           variant="contained"

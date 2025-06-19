@@ -49,7 +49,11 @@ const userSchema = new mongoose.Schema({
         address: {
             type: String,
             trim: true
-        }
+        },
+        medicalConditions: [{
+            type: String,
+            trim: true
+        }]
     }
 }, {
     timestamps: true
