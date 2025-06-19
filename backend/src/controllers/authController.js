@@ -83,9 +83,10 @@ const login = async (req, res) => {
 };
 
 const forgotPassword = async (req, res) => {
+    let user;
     try {
         const { email } = req.body;
-        const user = await User.findOne({ email });
+        user = await User.findOne({ email });
 
         if (!user) {
             return res.status(404).json({ message: 'User with that email does not exist' });
@@ -97,7 +98,7 @@ const forgotPassword = async (req, res) => {
 
         await user.save();
 
-        const resetUrl = `${req.protocol}://${req.get('host')}/reset-password/${resetToken}`;
+        const resetUrl = `http://localhost:3002/reset-password/${resetToken}`;
 
         const transporter = nodemailer.createTransport({
             service: 'gmail',
@@ -119,9 +120,11 @@ const forgotPassword = async (req, res) => {
         res.status(200).json({ message: 'Password reset link sent to your email' });
 
     } catch (error) {
-        user.passwordResetToken = undefined;
-        user.passwordResetExpires = undefined;
-        await user.save();
+        if (user) {
+            user.passwordResetToken = undefined;
+            user.passwordResetExpires = undefined;
+            await user.save();
+        }
         res.status(500).json({ message: error.message });
     }
 };
